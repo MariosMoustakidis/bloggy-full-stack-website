@@ -10,7 +10,6 @@
     <meta name="author" content="" />
     <title>Bloggy</title>
     {% block styles %}
-    <!-- Load Bootstrap-Flask CSS here -->
     {{ bootstrap.load_css() }}
     <link
       rel="icon"
@@ -66,7 +65,6 @@
                 >Home</a
               >
             </li>
-            <!-- TODO: Only show Login/Register if user is logged out. Otherwise show "Log Out" -->
             {% if not current_user.is_authenticated %}
             <li class="nav-item">
               <a

@@ -11,18 +11,19 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegistrationForm, LoginForm, CommentForm, ContactForm
 import smtplib
+import os
 
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Check if the user is logged in and has ID = 1
         if current_user.id != 1:
-            return abort(403)  # Return a 403 Forbidden error if not authorized
+            return abort(403)
         return f(*args, **kwargs)
     return decorated_function
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 login_manager = LoginManager()
@@ -34,8 +35,6 @@ gravatar = Gravatar(app,
                     force_lower=False,
                     use_ssl=False,
                     base_url=None)
-
-# TODO: Configure Flask-Login
 
 
 # CREATE DATABASE
@@ -49,7 +48,6 @@ login_manager.login_view = "login"
 
 
 # CONFIGURE TABLES
-# TODO: Create a User table for all your registered users.
 class User(UserMixin, db.Model):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -91,7 +89,6 @@ with app.app_context():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# TODO: Use Werkzeug to hash the user's password when creating a new user.
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -115,8 +112,6 @@ def register():
         return redirect(url_for('get_all_posts'))
     return render_template("register.html", form=form)
 
-
-# TODO: Retrieve a user from the database based on their email. 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -148,8 +143,6 @@ def get_all_posts():
     posts = result.scalars().all()
     return render_template("index.html", all_posts=posts)
 
-
-# TODO: Allow logged-in users to comment on posts
 @app.route("/post/<int:post_id>", methods=['GET', 'POST'])
 def show_post(post_id):
     form = CommentForm()
@@ -172,8 +165,6 @@ def show_post(post_id):
     comments = requested_post.comments
     return render_template("post.html", post=requested_post, form=form, comments=comments)
 
-
-# TODO: Use a decorator so only an admin user can create a new post
 @app.route("/new-post", methods=["GET", "POST"])
 @admin_only
 def add_new_post():
@@ -192,8 +183,6 @@ def add_new_post():
         return redirect(url_for("get_all_posts"))
     return render_template("make-post.html", form=form)
 
-
-# TODO: Use a decorator so only an admin user can edit a post
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
 @admin_only
 def edit_post(post_id):
@@ -215,8 +204,6 @@ def edit_post(post_id):
         return redirect(url_for("show_post", post_id=post.id))
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
-
-# TODO: Use a decorator so only an admin user can delete a post
 @app.route("/delete/<int:post_id>")
 @admin_only
 def delete_post(post_id):
@@ -239,9 +226,11 @@ def contact():
         email = form.email.data
         phone = form.phone.data
         message = form.message.data
+        email_user = os.environ.get("EMAIL_USER")
+        email_password = os.environ.get("EMAIL_PASSWORD")
         with smtplib.SMTP('smtp.gmail.com') as connection:
             connection.starttls()
-            connection.login(user="mariosmoustakidis98@gmail.com", password="zcdrdkstcqaxhhvl")
+            connection.login(user=email_user, password=email_password)
             mail = f"Subject:New Message from Blog\nTo: moustakidismarios@gmail.com\n\nMessage from {name}\nPhone: {phone}\nEmail: {email}\nMessage: {message}"
             connection.sendmail(from_addr="mariosmoustakidis98@gmail.com", to_addrs="moustakidismarios@gmail.com", msg=mail)
         return redirect(url_for("contact", msg_sent=True))
@@ -250,4 +239,4 @@ def contact():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=False)
