@@ -218,25 +218,25 @@ def about():
     return render_template("about.html")
 
 
+email_user = os.environ.get("EMAIL_USER")
+email_password = os.environ.get("EMAIL_PASSWORD")
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
-    form = ContactForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        email = form.email.data
-        phone = form.phone.data
-        message = form.message.data
-        email_user = os.environ.get("EMAIL_USER")
-        email_password = os.environ.get("EMAIL_PASSWORD")
+    if request.method == "POST":
+        data = request.form
+        name = data["name"]
+        email = data["email"]
+        phone = data["phone"]
+        message = data["message"]
+
         with smtplib.SMTP('smtp.gmail.com') as connection:
             connection.starttls()
             connection.login(user=email_user, password=email_password)
             mail = f"Subject:New Message from Blog\nTo: moustakidismarios@gmail.com\n\nMessage from {name}\nPhone: {phone}\nEmail: {email}\nMessage: {message}"
             connection.sendmail(from_addr="mariosmoustakidis98@gmail.com", to_addrs="moustakidismarios@gmail.com", msg=mail)
-        return redirect(url_for("contact", msg_sent=True))
-    msg_sent = request.args.get("msg_sent", False)
-    return render_template("contact.html", form=form, msg_sent=msg_sent)
+        return render_template("contact.html", msg_sent=True)
+    return render_template("contact.html", msg_sent=False)
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
