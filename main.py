@@ -162,7 +162,7 @@ def show_post(post_id):
             return redirect(url_for('login'))
 
     requested_post = db.get_or_404(BlogPost, post_id)
-    comments = requested_post.comments
+    comments = Comment.query.filter_by(post_id=post_id).order_by(Comment.id.desc()).all()
     return render_template("post.html", post=requested_post, form=form, comments=comments)
 
 @app.route("/new-post", methods=["GET", "POST"])
