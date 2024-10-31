@@ -1,5 +1,5 @@
 from datetime import date
-from flask import Flask, abort, render_template, redirect, url_for, flash, request
+from flask import Flask, abort, render_template, redirect, url_for, flash, request, send_from_directory
 from flask_bootstrap import Bootstrap5
 from flask_ckeditor import CKEditor
 from flask_gravatar import Gravatar
@@ -237,6 +237,9 @@ def contact():
         return render_template("contact.html", msg_sent=True)
     return render_template("contact.html", msg_sent=False)
 
+@app.route('/download')
+def download():
+    return send_from_directory("static", "files/MariosMoustakidis_CV.pdf")
 
 if __name__ == "__main__":
     app.run(debug=True)
