@@ -1,3 +1,6 @@
+The site is live on: [bloggy-full-stack-website.onrender.com](https://bloggy-full-stack-website.onrender.com)
+Since it's using the free version of render.com please give it some time to load up the first time.
+
 A blog site where admins can upload articles.
 
 If you want to try to upload an article you can log in with Username: admin and Password: admin.
